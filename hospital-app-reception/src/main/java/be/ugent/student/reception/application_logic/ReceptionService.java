@@ -1,5 +1,8 @@
 package be.ugent.student.reception.application_logic;
 
+import be.ugent.student.reception.domain.CheckInSaga;
+import be.ugent.student.reception.domain.HospitalStayStatus;
+import be.ugent.student.reception.exceptions.BookedHospitalStayNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +14,8 @@ import be.ugent.student.reception.persistence.HospitalStayRepository;
 public class ReceptionService {
 	@Autowired
 	private HospitalStayRepository hospitalStayRepository;
+	@Autowired
+	private CheckInSaga checkInSaga;
 		
 	
 	//----------------------------------------
@@ -24,8 +29,18 @@ public class ReceptionService {
 	}
 	//------------------------------------------
 	
-	
-	
-	
-	
+	public void setBookedHospitalStayStatusToPending(String patientId) {
+		HospitalStay stay = hospitalStayRepository.findByPatientIdAndStatusBooked(patientId);
+		stay.setStatus(HospitalStayStatus.CHECK_IN_PENDING);
+		hospitalStayRepository.save(stay);
+	}
+
+	public void checkIn(String patientId) throws BookedHospitalStayNotFoundException {
+    	HospitalStay stay = hospitalStayRepository.findByPatientIdAndStatusBooked(patientId);
+    	if (stay == null) {
+			throw new BookedHospitalStayNotFoundException();
+		} else {
+			checkInSaga.startPatientCheckInSaga(stay);
+		}
+	}
 }

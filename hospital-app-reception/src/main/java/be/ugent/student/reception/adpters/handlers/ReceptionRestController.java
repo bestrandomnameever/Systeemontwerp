@@ -3,6 +3,7 @@ package be.ugent.student.reception.adpters.handlers;
 import java.util.HashMap;
 import java.util.Map;
 
+import be.ugent.student.reception.exceptions.BookedHospitalStayNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -51,14 +52,12 @@ public class ReceptionRestController {
 		deferredResult.onTimeout(() ->  deferredResult.setErrorResult("Request timeout occurred."));
 		deferredResults.put(patientId, deferredResult); // we will use patientId as a unique value
 				
-		/*try {
-		
-			//call your service class (saga) here
-			 
+		try {
+			reception.checkIn(patientId);
 		} catch (BookedHospitalStayNotFoundException e) {
 			deferredResults.remove(patientId); 
 			deferredResult.setErrorResult("Failed to check-in patient. " + e.getMessage());
-		}*/
+		}
 		
 		return deferredResult;
 	}

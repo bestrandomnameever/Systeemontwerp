@@ -2,11 +2,14 @@ package be.ugent.student.reception;
 
 import java.util.Date;
 
+import be.ugent.student.reception.adapters.messaging.MessageChannelGateway;
+import be.ugent.student.reception.adapters.messaging.ProducerChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 
 import be.ugent.student.reception.domain.HospitalStay;
@@ -21,6 +24,7 @@ import be.ugent.student.reception.persistence.HospitalStayRepository;
  *
  */
 @SpringBootApplication
+@EnableBinding(ProducerChannels.class)
 public class HospitalAppReceptionApplication {
 	
 	private static final Logger log = LoggerFactory.getLogger(HospitalAppReceptionApplication.class);
@@ -32,7 +36,7 @@ public class HospitalAppReceptionApplication {
 	
 	
 	@Bean
-	public CommandLineRunner demo(HospitalStayRepository repository) {
+	public CommandLineRunner demo(HospitalStayRepository repository, MessageChannelGateway gateway) {
 		
 		return (args) -> {		
 			
@@ -53,7 +57,9 @@ public class HospitalAppReceptionApplication {
 			// fetch single booked HospitalStay for patient
 			log.info("HospitalStay found with findByPaitentIdAndStatusBooked():");
 			log.info(repository.findByPatientIdAndStatusBooked("2").toString());
-			log.info("-------------------------------");						
+			log.info("-------------------------------");
+
+			gateway.assignBed(repository.findByPatientId("1"));
 		};
 	}
 }
